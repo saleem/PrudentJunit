@@ -1,0 +1,35 @@
+PrudentJunit is a junit plugin that allows you to conditionally ignore Junit tests based on a specified
+System Property. It's built to work with junit-4.9b3.jar. If you have an older version of Junit, it might not
+work for you.
+
+Why is PrudentJunit necessary? While it is possible to *always* exclude a test using Junit's @Ignore annotation, there
+is no standard annotation in Junit to *conditionally* ignore a test based on an environment property.
+
+PrudentJunit allows you to do this.
+
+Here are a few simple rules on how to use PrudentJunit:
+
+1. Put the PrudentJunit-<TimeStamp>.jar in your classpath.
+
+2. In your test class, specify PrudentTestRunner as the TestRunner by placing this incantation before the class
+directive:
+  @RunWith(value=PrudentTestRunner.class)
+
+3. Annotate the tests that you want to run conditionally with the @PrudentTest annotation. All tests so annotated
+will run IFF a System.property named "junit.prudent" exists at run time and its value is "true" (case-insensitive).
+
+4. If you'd rather have a differently named property, you may specify it by using the ifTrue property of
+the @PrudentTest annotation, like this:
+
+  @PrudentTest(ifTrue = "my.very.own.system.property")
+
+5. You may also use the plain-old @Test and @Ignore annotations as normal in your test class.
+
+Please note that while the usual way to pass System properties to a JVM that's launched from the command line is
+to use the -D switch, this does not work when you're running tests via an Ant target. (Ant does not pass *its*
+-D parameters to the underlying junit target.) To accomplish this requires a bit of Ant juggling. Please see
+ the build.xml in the project on how to do this.
+
+That's about all there is to it. Enjoy!
+
+-Saleem Siddiqui
