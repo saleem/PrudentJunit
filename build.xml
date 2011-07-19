@@ -1,0 +1,80 @@
+<!--
+   Copyright 2011 Saleem Siddiqui
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<project name="PrudentJunit" default="test" basedir=".">
+    <description>
+        Enhancing Junit to run test conditionally, based on a specified System property
+    </description>
+    <property file="build.properties"/>
+
+    <path id="project.classpath">
+        <pathelement location="${lib.dir}/junit-4.9b3.jar"/>
+        <pathelement path="${build.dir}/"/>
+    </path>
+
+    <target name="init">
+        <tstamp/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${reports.dir}"/>
+    </target>
+
+    <target name="compile" depends="init"
+            description="compile the source ">
+        <javac srcdir="${src.dir}" classpathref="project.classpath" destdir="${build.dir}" includeantruntime="true"/>
+    </target>
+
+
+    <target name="compile.tests" depends="compile"
+            description="compile the tests ">
+        <javac srcdir="${test.dir}" classpathref="project.classpath" destdir="${build.dir}" includeantruntime="true"/>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+        <jar jarfile="${dist.dir}/${ant.project.name}-${DSTAMP}.jar" basedir="${build.dir}"/>
+    </target>
+
+    <target name="clean"
+            description="clean up">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${reports.dir}"/>
+    </target>
+
+    <property name="test" value="Test"/>
+    <property name="ignore" value="false"/>
+    <property name="ignore.add" value="false"/>
+    <target name="test" depends="compile.tests" description="runs the tests">
+        <junit printsummary="yes" fork="yes" haltonfailure="no" includeantruntime="true" failureproperty="test.failed"
+               showoutput="yes">
+            <sysproperty key="junit.prudent" value="${ignore}"/>
+            <sysproperty key="junit.prudent.add" value="${ignore.add}"/>
+            <classpath refid="project.classpath"/>
+            <formatter type="plain"/>
+            <batchtest todir="${reports.dir}">
+                <fileset dir="${test.dir}">
+                    <include name="**/*${test}.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+        <fail if="test.failed" message="Test failure(s)."/>
+    </target>
+
+    <target name="ensure-test-name" unless="test">
+        <fail message="You must run this target with -Dtest=TestName"/>
+    </target>
+</project>
